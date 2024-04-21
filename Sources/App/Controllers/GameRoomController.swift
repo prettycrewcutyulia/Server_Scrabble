@@ -35,7 +35,7 @@ struct GameRoomController: RouteCollection {
         return gameRooms
     }
     
-    // Получить комнату
+    // Получить комнату по id.
     func getGameRoom(_ req: Request) async throws -> GameRoom {
         guard let gameRoom = try await GameRoom.find(req.parameters.get("gameRoomId"), on: req.db)
         else {
