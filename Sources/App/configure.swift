@@ -18,7 +18,12 @@ public func configure(_ app: Application) async throws {
     ), as: .psql)
     
     app.migrations.add(CreateGameRoom())
-    try await app.autoMigrate().get()
-    // register routes
-    try routes(app)
+    do {
+        try await app.autoMigrate().get()
+        // register routes
+        try routes(app)
+    } catch {
+        print("An error occurred during application configuration: \(error)")
+        exit(0)
+    }
 }
