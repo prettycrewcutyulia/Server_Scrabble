@@ -35,6 +35,4 @@ final class GameRoom: Model, Content {
         self.gameStatus = gameStatus
         self.currentNumberOfChips = currentNumberOfChips
     }
-    
-    
 }

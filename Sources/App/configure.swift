@@ -18,6 +18,7 @@ public func configure(_ app: Application) async throws {
     ), as: .psql)
     
     app.migrations.add(CreateGameRoom())
+    app.migrations.add(CreateGamerIntoRoom())
     try await app.autoMigrate().get()
     // register routes
     try routes(app)
