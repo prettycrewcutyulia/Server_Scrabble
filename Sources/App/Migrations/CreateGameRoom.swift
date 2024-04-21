@@ -8,18 +8,18 @@
 import Fluent
 import Vapor
 
-struct CreateGameRoom: Migration {
-    func prepare(on database: any FluentKit.Database) -> NIOCore.EventLoopFuture<Void> {
-        database.schema("gameRooms")
+struct CreateGameRoom: AsyncMigration {
+    func prepare(on database: any FluentKit.Database) async throws {
+        let schema = database.schema("gameRooms")
             .id()
             .field("adminNickname", .string, .required)
             .field("roomCode", .string)
             .field("gameStatus", .string, .required)
             .field("currentNumberOfChips", .int, .required)
-            .create()
+        try await schema.create()
     }
     
-    func revert(on database: any FluentKit.Database) -> NIOCore.EventLoopFuture<Void> {
-        database.schema("gameRooms").delete()
+    func revert(on database: any FluentKit.Database) async throws {
+        try await database.schema("gameRooms").delete()
     }
 }
