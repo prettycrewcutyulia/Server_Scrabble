@@ -14,16 +14,20 @@ final class GamerIntoRoom: Model, Content {
     var id: UUID?
     
     @Field(key: "gamerId")
-    var gamerId: String
+    var gamerId: UUID
     
     @Field(key: "roomId")
-    var roomId: String
+    var roomId: UUID
+    
+    @Field(key: "enteredPassword")
+    var enteredPassword: String? // введенный пользователем код от комнаты.
     
     init() {}
     
-    init(id: UUID? = nil, gamerId: String, roomId: String) {
+    init(id: UUID? = nil, gamerId: UUID, roomId: UUID, enteredPassword: String? = nil) {
         self.id = id
         self.gamerId = gamerId
         self.roomId = roomId
+        self.enteredPassword = enteredPassword
     }
 }

@@ -12,8 +12,9 @@ struct CreateGamerIntoRoom: AsyncMigration {
     func prepare(on database: any FluentKit.Database) async throws {
         let schema = database.schema("gamersIntoRoom")
             .id()
-            .field("gamerId", .string, .required)
-            .field("roomId", .string, .required)
+            .field("gamerId", .uuid, .required)
+            .field("roomId", .uuid, .required)
+            .field("enteredPassword", .string)
         try await schema.create()
     }
     
