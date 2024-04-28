@@ -7,10 +7,16 @@
 
 import Fluent
 import Vapor
+import JWT
 
 struct GamerIntoRoomController: RouteCollection {
     func boot(routes: any Vapor.RoutesBuilder) throws {
-        let gamersIntoRoomsGroup = routes.grouped("gamersIntoRoom")
+        
+        let gamersIntoRoomsGroup = routes
+            .grouped("gamersIntoRoom")
+            .grouped(UserAuthenticator())
+            .grouped(User.guardMiddleware())
+        
         gamersIntoRoomsGroup.post(use: {try await self.setGamerIntoRoom($0)})
         gamersIntoRoomsGroup.get(use: {try await self.getHandler($0)})
         gamersIntoRoomsGroup.get("gamerId", ":gamerId", use: {try await self.getRoomIdByGamerId($0)})

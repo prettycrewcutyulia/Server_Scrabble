@@ -2,6 +2,7 @@ import NIOSSL
 import Fluent
 import FluentPostgresDriver
 import Vapor
+import JWT
 
 // configures your application
 public func configure(_ app: Application) async throws {
@@ -18,6 +19,7 @@ public func configure(_ app: Application) async throws {
     ), as: .psql)
     
     app.migrations.add(CreateGameRoom())
+    app.migrations.add(CreateUser())
     do {
         try await app.autoMigrate().get()
         // register routes
@@ -26,4 +28,8 @@ public func configure(_ app: Application) async throws {
         print("An error occurred during application configuration: \(error)")
         exit(0)
     }
+    
+    
+    // Add HMAC with SHA-256 signer.
+    app.jwt.signers.use(.hs256(key: "secret"))
 }

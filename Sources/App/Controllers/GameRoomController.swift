@@ -11,7 +11,11 @@ import Vapor
 struct GameRoomController: RouteCollection {
     
     func boot(routes: any Vapor.RoutesBuilder) throws {
-        let gameRoomsGroup = routes.grouped("gameRooms")
+        let gameRoomsGroup = routes
+            .grouped("gameRooms")
+            .grouped(UserAuthenticator())
+            .grouped(User.guardMiddleware())
+    
         gameRoomsGroup.post(use: {try await self.createGameRoom($0)})
         gameRoomsGroup.get(use: {try await self.getAllGameRooms($0)})
         gameRoomsGroup.get(":gameRoomId", use: {try await self.getGameRoom($0)})
