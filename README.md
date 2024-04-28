@@ -20,3 +20,4 @@ VALUES(key, NULL);
 RAISE NOTICE 'New API key: %', key;
 END $$;
 ```
+Вместо `NULL` в `expires_at` можно указать время, до которого API ключ действителен
