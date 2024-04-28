@@ -53,3 +53,6 @@ END $$;
 
 [<img src="https://run.pstmn.io/button.svg" alt="Run In Postman" style="width: 128px; height: 32px;">](https://app.getpostman.com/run-collection/16591743-09507c13-eb6d-4a22-9dac-9e45f5a9ad75?action=collection%2Ffork&source=rip_markdown&collection-url=entityId%3D16591743-09507c13-eb6d-4a22-9dac-9e45f5a9ad75%26entityType%3Dcollection%26workspaceId%3D3e05b8c0-ac2f-46ad-b9b1-934571107a79#?env%5BNew%20Environment%5D=W10=)
 
+### Как устроен запрос к API
+* У любого запроcа должен присутствовать header `ApiKey: <YOUR_API_KEY>` - ключ, который добавлен в базу данных, которая подключена к серверу. Если данный header не установлен или установлен с неправильным значением, пользователь получит ошибку
+* Для запросов, которым требуется авторизация (то есть всем, кроме `/auth/login` и `/auth/register`), должен присутствовать header `Authorization: Bearer <JWT_TOKEN>`, значением которого является JWT-токен, полученный при авторизации
