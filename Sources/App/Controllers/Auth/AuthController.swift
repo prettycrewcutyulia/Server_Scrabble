@@ -12,7 +12,9 @@ import Fluent
 struct AuthController: RouteCollection {
     
     func boot(routes: RoutesBuilder) throws {
-        let authGroup = routes.grouped("auth")
+        let authGroup = routes
+            .grouped("auth")
+            .protectedWithApiKey()
         
         authGroup.post("login", use: {try await self.login($0)})
         authGroup.post("register", use: {try await self.register($0)})

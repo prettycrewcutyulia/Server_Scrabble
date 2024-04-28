@@ -20,6 +20,8 @@ public func configure(_ app: Application) async throws {
     
     app.migrations.add(CreateGameRoom())
     app.migrations.add(CreateUser())
+    app.migrations.add(CreateApiKey())
+    
     do {
         try await app.autoMigrate().get()
         // register routes

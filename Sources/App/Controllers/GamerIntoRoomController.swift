@@ -16,8 +16,7 @@ struct GamerIntoRoomController: RouteCollection {
         
         let gamersIntoRoomsGroup = routes
             .grouped("gamersIntoRoom")
-            .grouped(UserAuthenticator())
-            .grouped(User.guardMiddleware())
+            .protectedWithApiKeyAndUserAuth()
         
         gamersIntoRoomsGroup.post(use: {try await setGamerIntoRoom($0)})
         gamersIntoRoomsGroup.get("roomId", ":roomId", "gamersIds", use: {try await getAllGamersIdsByRoomId($0)})
