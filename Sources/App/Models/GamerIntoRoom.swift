@@ -22,12 +22,22 @@ final class GamerIntoRoom: Model, Content {
     @Field(key: "enteredPassword")
     var enteredPassword: String? // введенный пользователем код от комнаты.
     
+    @Field(key: "chips")
+    var chips: [Chips]?
+    
     init() {}
     
-    init(id: UUID? = nil, gamerId: UUID, roomId: UUID, enteredPassword: String? = nil) {
+    init(
+        id: UUID? = nil,
+        gamerId: UUID,
+        roomId: UUID,
+        enteredPassword: String? = nil,
+        chips: [Chips]? = nil
+    ) {
         self.id = id
         self.gamerId = gamerId
         self.roomId = roomId
         self.enteredPassword = enteredPassword
+        self.chips = chips
     }
 }
