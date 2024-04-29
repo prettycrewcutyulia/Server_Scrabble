@@ -19,8 +19,12 @@ public func configure(_ app: Application) async throws {
     ), as: .psql)
     
     app.migrations.add(CreateGameRoom())
+    app.migrations.add(CreateGamerIntoRoom())
     app.migrations.add(CreateUser())
     app.migrations.add(CreateApiKey())
+    app.migrations.add(CreateMovesInGameRoom())
+    app.migrations.add(CreateGameChips())
+    app.migrations.add(CreateChipsOnField())
     
     do {
         try await app.autoMigrate().get()
