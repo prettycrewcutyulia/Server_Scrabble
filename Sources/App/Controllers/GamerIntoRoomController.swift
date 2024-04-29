@@ -1,6 +1,6 @@
 //
 //  File.swift
-//  
+//
 //
 //  Created by Irina Pechik on 21.04.2024.
 //
@@ -20,6 +20,7 @@ struct GamerIntoRoomController: RouteCollection {
         
         gamersIntoRoomsGroup.post(use: {try await setGamerIntoRoom($0)})
         gamersIntoRoomsGroup.get("roomId", ":roomId", "gamersIds", use: {try await getAllGamersIdsByRoomId($0)})
+        gamersIntoRoomsGroup.get("gamerId", ":gamerId", "roomId", ":roomId", "chips", use: { try await getChipsByGamerId($0)})
         gamersIntoRoomsGroup.get("gamerId", ":gamerId", "room", use: {try await self.getRoomIdByGamerId($0)})
         gamersIntoRoomsGroup.delete("deleteRoomWithId", ":roomId", use: {try await self.deleteRoom($0)})
         gamersIntoRoomsGroup.delete("deleteGamer", ":gamerId", "withRoom", ":roomId", use: {try await self.deleteGamerFromRoom($0)})
@@ -58,15 +59,15 @@ struct GamerIntoRoomController: RouteCollection {
         
         // Проверка на количество человек в комнате.
         let allGamersIntoRoom = try await GamerIntoRoom.query(on: req.db)
-                                            .filter(\.$roomId == gamerIntoRoom.roomId)
-                                            .all()
+            .filter(\.$roomId == gamerIntoRoom.roomId)
+            .all()
         if allGamersIntoRoom.count >= 4 {
             throw Abort(.custom(code: 500, reasonPhrase: "В игровой комнате не могут находиться более 4 человек"))
         }
         let isGamerAlreadyInRoom = try await GamerIntoRoom.query(on: req.db)
-                                            .filter(\.$gamerId == gamerIntoRoom.gamerId)
-                                            .all()
-                                            .count > 0
+            .filter(\.$gamerId == gamerIntoRoom.gamerId)
+            .all()
+            .count > 0
         if isGamerAlreadyInRoom {
             throw Abort(.custom(code: 500, reasonPhrase: "Данный игрок уже привязан в комнате"))
         }
@@ -84,6 +85,27 @@ struct GamerIntoRoomController: RouteCollection {
                 throw Abort(.notFound)
             }
             return gamer.roomId
+        } else {
+            throw Abort(.notFound)
+        }
+    }
+    
+    func getChipsByGamerId(_ req: Request) async throws -> [Chips] {
+        if
+            let gamerIdString = req.parameters.get("gamerId"),
+            let gamerId = UUID(gamerIdString),
+            let roomIdString = req.parameters.get("roomId"),
+            let roomId = UUID(roomIdString)
+        {
+            guard let gamerIntoRoom = try await GamerIntoRoom.query(on: req.db)
+                .filter(\.$gamerId == gamerId)
+                .filter(\.$roomId == roomId)
+                .first()
+            else {
+                throw Abort(.notFound)
+            }
+            
+            return gamerIntoRoom.chips ?? []
         } else {
             throw Abort(.notFound)
         }

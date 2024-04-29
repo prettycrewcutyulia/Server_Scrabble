@@ -19,13 +19,13 @@ struct GameRoomController: RouteCollection {
         gameRoomsGroup.get(use: {try await self.getAllGameRooms($0)})
         gameRoomsGroup.get(":gameRoomId", use: {try await self.getGameRoom($0)})
         gameRoomsGroup.get("getRoomCodeFor", ":gameRoomId", use: {try await self.getGameRoomCode($0)})
+        gameRoomsGroup.get("getCountChipsInBoxFor", ":gameRoomId", use: { try await self.getCountChipsInBox($0) })
         gameRoomsGroup.get(":gameRoomId", "getChipsNumber", use: {try await self.getCurrentNumberOfChips($0)})
         gameRoomsGroup.put(":gameRoomId", "setChipsNumber", ":chipsNumber", use: {try await self.changeCurrentNumberOfChips($0)})
         gameRoomsGroup.put(":gameRoomId", "addOneChip", use: {try await self.addOneChip($0)})
         gameRoomsGroup.put(":gameRoomId", "subtractOneChip", use: {try await self.subtractOneChip($0)})
         gameRoomsGroup.put(":gameRoomId", "run", use: {try await self.runGame($0)})
         gameRoomsGroup.put(":gameRoomId", "pause", use: {try await self.pauseGame($0)})
-        gameRoomsGroup.put(":gameRoomId", "end", use: {try await self.endedGame($0)})
         gameRoomsGroup.put(":gameRoomId", "end", use: {try await self.endedGame($0)})
         gameRoomsGroup.put(":gameRoomId", "stop", use: {try await self.stopGame($0)})
 
@@ -66,6 +66,13 @@ struct GameRoomController: RouteCollection {
         } else {
             throw Abort(.custom(code: 404, reasonPhrase: "Для данной комнаты не существует пароля"))
         }
+    }
+    
+    // Получение количества оставшихся фишек в мешке
+    func getCountChipsInBox(_ req: Request) async throws -> Int {
+        let gameRoom = try await getGameRoom(req)
+        var chipsCount = gameRoom.currentNumberOfChips
+        return chipsCount
     }
     
     // Меняет статус игры на "Running"
