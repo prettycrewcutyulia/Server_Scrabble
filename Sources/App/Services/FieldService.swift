@@ -74,4 +74,11 @@ struct FieldService {
             chip.create(on: db)
         }.flatten(on: db.eventLoop)
     }
+    
+    // Удаляет все фишки игры после завершения игры (нужно, чтобы не засорять базу данных)
+    func clearGameChips(for gameId: UUID, on db: Database) -> EventLoopFuture<Void> {
+        GameChips.query(on: db)
+                .filter(\.$gameId == gameId)
+                .delete()
+    }
 }
