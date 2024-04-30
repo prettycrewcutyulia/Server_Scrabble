@@ -96,7 +96,7 @@ struct FieldService {
             let tileBonus = scrabbleBoard[coordKey, default: .none]
             
             // Очки за одну фишку
-            var chipScore = chipOnField.chips.point
+            var chipScore = chipOnField.chip.point
             
             // Применяем бонусы к буквам
             switch tileBonus {

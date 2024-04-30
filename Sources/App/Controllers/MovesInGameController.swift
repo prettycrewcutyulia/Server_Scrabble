@@ -20,6 +20,7 @@ struct MovesInGameController: RouteCollection {
         movesGroup.post("addMove", use: { try await MovesFunction.createMove($0) })
         movesGroup.delete("deleteMove", use: { try await MovesFunction.deleteMove($0)})
         movesGroup.get("checkWord", ":word", use: { try await MovesFunction.checkWord($0) })
+        movesGroup.get("getPointsByGamerId", ":gamerId", "gameId", ":gameId", use: { try await MovesFunction.getPointsByGameId($0) })
     }
 }
 
@@ -171,4 +172,28 @@ enum MovesFunction {
         }
     }
 
+    static func getPointsByGameId(_ req: Request) async throws -> Int {
+        guard let gamerIdString = req.parameters.get("gamerId"),
+              let gamerId = UUID(gamerIdString),
+              let gameIdString = req.parameters.get("gameId"),
+              let gameId = UUID(gameIdString)
+        else {
+            throw Abort(.badRequest, reason: "Не удалось получить параметры запроса.")
+        }
+        
+        let moves = try await Move.query(on: req.db)
+            .filter(\.$gamerId == gamerId)
+            .filter(\.$gameId == gameId)
+            .all()
+        
+        var result = 0
+        
+        for move in moves {
+            let chips = try await ChipsOnField.query(on: req.db).filter(\.$moveId == move.id!).all()
+            
+             result += FieldService.wordScoring(word: chips)
+        }
+             
+        return result
+    }
 }
