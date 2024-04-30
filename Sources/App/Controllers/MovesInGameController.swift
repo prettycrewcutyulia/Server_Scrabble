@@ -18,7 +18,7 @@ struct MovesInGameController: RouteCollection {
     func boot(routes: any Vapor.RoutesBuilder) throws {
         let movesGroup = routes
             .grouped("moves")
-//            .protectedWithApiKeyAndUserAuth()
+            .protectedWithApiKeyAndUserAuth()
         
         movesGroup.get("gameId", ":gameId", use: { try await MovesFunction.getMovesByGameId($0) })
         movesGroup.post("addMove", use: { try await MovesFunction.createMove($0) })
