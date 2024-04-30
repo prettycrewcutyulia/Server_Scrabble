@@ -89,7 +89,7 @@ enum MovesFunction {
         
         let chipsString = moveDTO.chips.map { $0.chip.alpha }.joined(separator: "")
         
-        var result = try await checkWord(word: chipsString)
+        let result = try await checkWord(word: chipsString)
         if !result {
             return Response(status: .badRequest, body: "Слово орфографически некорректно.")
         }

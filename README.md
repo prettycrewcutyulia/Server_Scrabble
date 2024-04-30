@@ -26,6 +26,7 @@ CREATE DATABASE vapor_database;
 ```
 docker-compose up db
 ```
+6. Запустить сам проект, используя инструменты Xcode
 
 ### Добавление API ключа: 
 
