@@ -16,7 +16,6 @@ struct CreateMovesInGameRoom: AsyncMigration {
             .field("gamerId", .uuid, .required)
             .field("startCoordinate", .json, .required)
             .field("stopCoordinate", .json, .required)
-            .field("word", .string, .required)
         try await schema.create()
     }
     

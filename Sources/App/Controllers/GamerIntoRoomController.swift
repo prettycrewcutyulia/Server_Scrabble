@@ -90,7 +90,7 @@ struct GamerIntoRoomController: RouteCollection {
         }
     }
     
-    func getChipsByGamerId(_ req: Request) async throws -> [Chips] {
+    func getChipsByGamerId(_ req: Request) async throws -> [Chip] {
         if
             let gamerIdString = req.parameters.get("gamerId"),
             let gamerId = UUID(gamerIdString),

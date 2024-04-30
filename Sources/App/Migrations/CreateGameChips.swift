@@ -13,7 +13,7 @@ struct CreateGameChips: AsyncMigration {
         let schema = database.schema("gameChips")
             .id()
             .field("gameId", .uuid, .required)
-            .field("chips", .json, .required)
+            .field("chip", .json, .required)
             .field("quantity", .int, .required)
         try await schema.create()
     }
