@@ -20,12 +20,13 @@ struct MovesInGameController: RouteCollection {
         movesGroup.post("addMove", use: { try await MovesFunction.createMove($0) })
         movesGroup.delete("deleteMove", use: { try await MovesFunction.deleteMove($0)})
         movesGroup.get("checkWord", ":word", use: { try await MovesFunction.checkWord($0) })
-        movesGroup.get("getPointsByGamerId", ":gamerId", "gameId", ":gameId", use: { try await MovesFunction.getPointsByGameId($0) })
+        movesGroup.get("getPointsByGamerId", ":gamerId", "gameId", ":gameId", use: { try await MovesFunction.getPointsByGamerId($0) })
     }
 }
 
 
 enum MovesFunction {
+    // Получить все ходы в игре
     static func getMovesByGameId(_ req: Request) async throws -> [MoveDTO] {
         guard let gameIDString = req.parameters.get("gameId"),
               let gameID = UUID(gameIDString)
@@ -58,6 +59,7 @@ enum MovesFunction {
         return result
     }
     
+    // Сделать ход(поставить слово на карту)
     static func createMove(_ req: Request) async throws -> Response {
         let moveDTO = try req.content.decode(MoveDTO.self)
         let move = Move(
@@ -110,6 +112,7 @@ enum MovesFunction {
         return Response(status: .created)
     }
     
+    // Удалить ход
     static func deleteMove(_ req: Request) async throws -> Response {
         let move = try req.content.decode(Move.self)
         guard let move = try await Move.query(on: req.db)
@@ -136,6 +139,7 @@ enum MovesFunction {
         
     }
     
+    // Проверить орфографию слова
     static func checkWord(_ req: Request) async throws -> Response {
         guard let word = req.parameters.get("word") else {
             throw Abort(.badRequest, reason: "Не удалось получить слово для проверки орфографии.")
@@ -172,7 +176,8 @@ enum MovesFunction {
         }
     }
 
-    static func getPointsByGameId(_ req: Request) async throws -> Int {
+    // Получить очки игрока
+    static func getPointsByGamerId(_ req: Request) async throws -> Int {
         guard let gamerIdString = req.parameters.get("gamerId"),
               let gamerId = UUID(gamerIdString),
               let gameIdString = req.parameters.get("gameId"),

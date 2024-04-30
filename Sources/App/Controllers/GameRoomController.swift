@@ -71,7 +71,7 @@ struct GameRoomController: RouteCollection {
     // Получение количества оставшихся фишек в мешке
     func getCountChipsInBox(_ req: Request) async throws -> Int {
         let gameRoom = try await getGameRoom(req)
-        var chipsCount = gameRoom.currentNumberOfChips
+        let chipsCount = gameRoom.currentNumberOfChips
         return chipsCount
     }
     

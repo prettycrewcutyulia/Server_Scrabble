@@ -17,12 +17,8 @@ class TokensHelper {
     
     /// Create payload for Access Token
     class func createPayload(from user: User) throws -> UserPayload {
-        do {
-            let expirationTime = ExpirationClaim(value: Date().addingTimeInterval(Constants.expirationTime))
-            return UserPayload(userID: user.id!.uuidString, exp: expirationTime)
-        } catch {
-            throw JWTError.payloadCreation
-        }
+        let expirationTime = ExpirationClaim(value: Date().addingTimeInterval(Constants.expirationTime))
+        return UserPayload(userID: user.id!.uuidString, exp: expirationTime)
     }
     
     // Создает токен доступа, в котором передает данные об ID пользователя и времени, когда токен нужно перезапросить

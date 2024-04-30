@@ -8,6 +8,7 @@
 import Foundation
 import Vapor
 
+// Ход
 struct MoveDTO: Codable, Content {
     var gameId: UUID
     var gamerId: UUID

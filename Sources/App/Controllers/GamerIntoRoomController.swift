@@ -9,8 +9,6 @@ import Fluent
 import Vapor
 import JWT
 
-extension UUID: Content {}
-
 struct GamerIntoRoomController: RouteCollection {
     func boot(routes: any Vapor.RoutesBuilder) throws {
         
@@ -90,6 +88,7 @@ struct GamerIntoRoomController: RouteCollection {
         }
     }
     
+    // Получение фишек на руках у игрока
     func getChipsByGamerId(_ req: Request) async throws -> [Chip] {
         if
             let gamerIdString = req.parameters.get("gamerId"),

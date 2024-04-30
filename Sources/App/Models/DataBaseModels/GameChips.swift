@@ -8,6 +8,7 @@
 import Fluent
 import Vapor
 
+// Фишки которые еще остались в игре в мешке
 final class GameChips: Model, Content {
     static let schema = "gameChips"
     

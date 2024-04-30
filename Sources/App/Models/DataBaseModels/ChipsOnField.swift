@@ -8,6 +8,7 @@
 import Fluent
 import Vapor
 
+// Фишки на поле
 final class ChipsOnField: Model, Content {
     static let schema = "chipsOnField"
     

@@ -23,7 +23,7 @@ final class GamerIntoRoom: Model, Content {
     var enteredPassword: String? // введенный пользователем код от комнаты.
     
     @Field(key: "chips")
-    var chips: [Chip]?
+    var chips: [Chip]? // фишки на руках у игрока
     
     init() {}
     

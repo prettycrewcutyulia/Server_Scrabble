@@ -8,6 +8,7 @@
 import Fluent
 import Vapor
 
+// Ход
 final class Move: Model, Content {
     static let schema = "movesInGameRoom"
     

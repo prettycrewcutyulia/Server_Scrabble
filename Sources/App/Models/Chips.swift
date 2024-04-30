@@ -8,6 +8,7 @@
 import Fluent
 import Vapor
 
+// Фишка
 struct Chip: Codable, Content, Equatable {
     var alpha: String
     var point: Int
