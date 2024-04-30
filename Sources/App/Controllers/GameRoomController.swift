@@ -40,6 +40,8 @@ struct GameRoomController: RouteCollection {
         let gameRoom = try req.content.decode(GameRoom.self)
         
         try await gameRoom.save(on: req.db)
+        try await FieldService.createInitialGameChips(for: try gameRoom.requireID(), on: req.db).get()
+        
         return gameRoom
     }
     
@@ -96,6 +98,8 @@ struct GameRoomController: RouteCollection {
         let gameRoom = try await getGameRoom(req)
         gameRoom.gameStatus = GameStatus.Ended.rawValue
         try await gameRoom.save(on: req.db)
+        try await FieldService.clearGameChips(for: try gameRoom.requireID(), on: req.db).get()
+        
         return gameRoom
     }
     

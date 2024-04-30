@@ -65,7 +65,7 @@ struct FieldService {
         return wordScore
     }
     
-    func createInitialGameChips(for gameId: UUID, on db: Database) -> EventLoopFuture<Void> {
+    static func createInitialGameChips(for gameId: UUID, on db: Database) -> EventLoopFuture<Void> {
         let chips = ScrabbleFieldConstants.initialChipDistribution.map { letter, points, quantity in
             GameChips(gameId: gameId, chip: Chip(alpha: letter, point: points), quantity: quantity)
         }
@@ -76,7 +76,7 @@ struct FieldService {
     }
     
     // Удаляет все фишки игры после завершения игры (нужно, чтобы не засорять базу данных)
-    func clearGameChips(for gameId: UUID, on db: Database) -> EventLoopFuture<Void> {
+    static func clearGameChips(for gameId: UUID, on db: Database) -> EventLoopFuture<Void> {
         GameChips.query(on: db)
                 .filter(\.$gameId == gameId)
                 .delete()
