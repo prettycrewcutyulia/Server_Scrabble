@@ -6,7 +6,7 @@
 //
 
 import Foundation
-
+import Fluent
 
 enum TileBonus {
     case doubleLetterScore
@@ -17,72 +17,7 @@ enum TileBonus {
     case none // Клетка без бонусов
 }
 
-
 struct FieldService {
-    static let scrabbleBoard: [String: TileBonus] = [
-        "A1": .tripleWordScore,
-        "D1": .doubleLetterScore,
-        "H1": .tripleWordScore,
-        "L1": .doubleLetterScore,
-        "O1": .tripleWordScore,
-        "B2": .doubleWordScore,
-        "F2": .tripleLetterScore,
-        "J2": .tripleLetterScore,
-        "N2": .doubleWordScore,
-        "C3": .doubleWordScore,
-        "G3": .doubleLetterScore,
-        "I3": .doubleLetterScore,
-        "M3": .doubleWordScore,
-        "A4": .doubleLetterScore,
-        "D4": .doubleWordScore,
-        "H4": .doubleLetterScore,
-        "L4": .doubleWordScore,
-        "O4": .doubleLetterScore,
-        "E5": .doubleWordScore,
-        "K5": .doubleWordScore,
-        "B6": .tripleLetterScore,
-        "F6": .tripleLetterScore,
-        "J6": .tripleLetterScore,
-        "N6": .tripleLetterScore,
-        "C7": .doubleLetterScore,
-        "G7": .doubleLetterScore,
-        "I7": .doubleLetterScore,
-        "M7": .doubleLetterScore,
-        "A8": .tripleWordScore,
-        "D8": .doubleLetterScore,
-        "H8": .star,
-        "L8": .doubleLetterScore,
-        "O8": .tripleWordScore,
-        "C9": .doubleLetterScore,
-        "G9": .doubleLetterScore,
-        "I9": .doubleLetterScore,
-        "M9": .doubleLetterScore,
-        "B10": .tripleLetterScore,
-        "F10": .tripleLetterScore,
-        "J10": .tripleLetterScore,
-        "N10": .tripleLetterScore,
-        "E11": .doubleWordScore,
-        "K11": .doubleWordScore,
-        "A12": .doubleLetterScore,
-        "D12": .doubleWordScore,
-        "H12": .doubleLetterScore,
-        "L12": .doubleWordScore,
-        "O12": .doubleLetterScore,
-        "C13": .doubleWordScore,
-        "G13": .doubleLetterScore,
-        "I13": .doubleLetterScore,
-        "M13": .doubleWordScore,
-        "B14": .doubleWordScore,
-        "F14": .tripleLetterScore,
-        "J14": .tripleLetterScore,
-        "N14": .doubleWordScore,
-        "A15": .tripleWordScore,
-        "D15": .doubleLetterScore,
-        "H15": .tripleWordScore,
-        "L15": .doubleLetterScore,
-        "O15": .tripleWordScore
-    ]
-        
     
     static func wordScoring(word: [ChipsOnField]) -> Int {
         var wordScore = 0
@@ -93,7 +28,7 @@ struct FieldService {
             let coordKey = "\(chipOnField.coordinate.x.capitalized)\(chipOnField.coordinate.y)"
             
             // Получаем бонус клетки
-            let tileBonus = scrabbleBoard[coordKey, default: .none]
+            let tileBonus = ScrabbleFieldConstants.scrabbleBoard[coordKey, default: .none]
             
             // Очки за одну фишку
             var chipScore = chipOnField.chip.point
@@ -128,5 +63,15 @@ struct FieldService {
         wordScore *= wordMultiplier
         
         return wordScore
+    }
+    
+    func createInitialGameChips(for gameId: UUID, on db: Database) -> EventLoopFuture<Void> {
+        let chips = ScrabbleFieldConstants.initialChipDistribution.map { letter, points, quantity in
+            GameChips(gameId: gameId, chip: Chip(alpha: letter, point: points), quantity: quantity)
+        }
+        
+        return chips.map { chip in
+            chip.create(on: db)
+        }.flatten(on: db.eventLoop)
     }
 }
