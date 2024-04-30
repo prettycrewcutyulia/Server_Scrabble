@@ -11,7 +11,6 @@ import JWT
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
-import Alamofire
 
 
 struct MovesInGameController: RouteCollection {
@@ -19,7 +18,7 @@ struct MovesInGameController: RouteCollection {
     func boot(routes: any Vapor.RoutesBuilder) throws {
         let movesGroup = routes
             .grouped("moves")
-            .protectedWithApiKeyAndUserAuth()
+//            .protectedWithApiKeyAndUserAuth()
         
         movesGroup.get("gameId", ":gameId", use: { try await MovesFunction.getMovesByGameId($0) })
         movesGroup.post("addMove", use: { try await MovesFunction.createMove($0) })
@@ -86,6 +85,13 @@ enum MovesFunction {
         
         let chips = moveDTO.chips.map { chip in
             return chip.chip
+        }
+        
+        let chipsString = moveDTO.chips.map { $0.chip.alpha }.joined(separator: "")
+        
+        var result = try await checkWord(word: chipsString)
+        if !result {
+            return Response(status: .badRequest, body: "Слово орфографически некорректно.")
         }
         
         for chip in chips {
@@ -176,6 +182,33 @@ enum MovesFunction {
         return result.isEmpty
     }
 
+    static func checkWord(word: String) async throws -> Bool {
+
+        // URL для запроса к API Яндекс.Спеллер
+        let urlString = "https://speller.yandex.net/services/spellservice.json/checkText?text=\(word)"
+        guard let url = URL(string: urlString) else {
+            throw Abort(.internalServerError, reason: "Неверный URL")
+        }
+
+        // Создаем URLRequest
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+
+        // Создаем URLSession
+        let session = URLSession.shared
+
+        // Отправляем запрос
+        let (data, _) = try await session.data(for: request)
+
+        // Парсим JSON ответ
+        guard let result = try JSONSerialization.jsonObject(with: data, options: []) as? [[String: Any]] else {
+            throw Abort(.internalServerError, reason: "Ошибка при обработке ответа от API")
+        }
+
+        // Проверяем результаты орфографии
+        return result.isEmpty
+    }
+    
     // Получить очки игрока
     static func getPointsByGamerId(_ req: Vapor.Request) async throws -> Int {
         guard let gamerIdString = req.parameters.get("gamerId"),
