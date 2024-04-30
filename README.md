@@ -49,7 +49,7 @@ END $$;
 Вместо `NULL` в `expires_at` можно указать время, до которого API ключ действителен
 
 ## Использование API на клиентах
-Эндпоинты API, которые доступны клиентам представены в Postman:
+Эндпоинты API, которые доступны клиентам представены в Postman (чтобы посмотреть, на странице по ссылке нажмите "View Collection"):
 
 [<img src="https://run.pstmn.io/button.svg" alt="Run In Postman" style="width: 128px; height: 32px;">](https://app.getpostman.com/run-collection/16591743-09507c13-eb6d-4a22-9dac-9e45f5a9ad75?action=collection%2Ffork&source=rip_markdown&collection-url=entityId%3D16591743-09507c13-eb6d-4a22-9dac-9e45f5a9ad75%26entityType%3Dcollection%26workspaceId%3D3e05b8c0-ac2f-46ad-b9b1-934571107a79#?env%5BNew%20Environment%5D=W10=)
 
