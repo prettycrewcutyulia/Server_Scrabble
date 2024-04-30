@@ -11,7 +11,10 @@ import Vapor
 struct GameRoomController: RouteCollection {
     
     func boot(routes: any Vapor.RoutesBuilder) throws {
-        let gameRoomsGroup = routes.grouped("gameRooms")
+        let gameRoomsGroup = routes
+            .grouped("gameRooms")
+            .protectedWithApiKeyAndUserAuth()
+    
         gameRoomsGroup.post(use: {try await self.createGameRoom($0)})
         gameRoomsGroup.get(use: {try await self.getAllGameRooms($0)})
         gameRoomsGroup.get(":gameRoomId", use: {try await self.getGameRoom($0)})
@@ -23,8 +26,8 @@ struct GameRoomController: RouteCollection {
         gameRoomsGroup.put(":gameRoomId", "run", use: {try await self.runGame($0)})
         gameRoomsGroup.put(":gameRoomId", "pause", use: {try await self.pauseGame($0)})
         gameRoomsGroup.put(":gameRoomId", "end", use: {try await self.endedGame($0)})
-        gameRoomsGroup.put(":gameRoomId", "end", use: {try await self.endedGame($0)})
         gameRoomsGroup.put(":gameRoomId", "stop", use: {try await self.stopGame($0)})
+        gameRoomsGroup.get(":gameRoomId", "getLeaderBoard", use: {try await self.getLeaderBoard($0)})
 
     }
     
@@ -37,6 +40,8 @@ struct GameRoomController: RouteCollection {
         let gameRoom = try req.content.decode(GameRoom.self)
         
         try await gameRoom.save(on: req.db)
+        try await FieldService.createInitialGameChips(for: try gameRoom.requireID(), on: req.db).get()
+        
         return gameRoom
     }
     
@@ -86,6 +91,8 @@ struct GameRoomController: RouteCollection {
         let gameRoom = try await getGameRoom(req)
         gameRoom.gameStatus = GameStatus.Ended.rawValue
         try await gameRoom.save(on: req.db)
+        try await FieldService.clearGameChips(for: try gameRoom.requireID(), on: req.db).get()
+        
         return gameRoom
     }
     
@@ -132,5 +139,12 @@ struct GameRoomController: RouteCollection {
         gameRoom.currentNumberOfChips -= 1
         try await gameRoom.save(on: req.db)
         return gameRoom
+    }
+    
+    func getLeaderBoard(_ req: Request) async throws -> LeaderBoard {
+        let gameRoom = try await getGameRoom(req)
+        let scores = try await LeaderBoardService.getNickNamesWithScores(for: gameRoom.id!, db: req.db)
+        
+        return LeaderBoard(players: scores)
     }
 }

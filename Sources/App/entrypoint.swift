@@ -11,11 +11,12 @@ enum Entrypoint {
         defer { app.shutdown() }
         
         do {
-            try await configure(app)
-        } catch {
-            app.logger.report(error: error)
-            throw error
-        }
-        try await app.execute()
+                   try await configure(app)
+                   try await app.execute()
+               } catch {
+                   app.logger.report(error: error)           
+                   throw error
+               }
+//        try await app.execute()
     }
 }

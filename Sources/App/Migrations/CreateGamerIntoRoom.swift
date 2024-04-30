@@ -15,6 +15,7 @@ struct CreateGamerIntoRoom: AsyncMigration {
             .field("gamerId", .uuid, .required)
             .field("roomId", .uuid, .required)
             .field("enteredPassword", .string)
+            .field("chips", .array(of: .json))
         try await schema.create()
     }
     
