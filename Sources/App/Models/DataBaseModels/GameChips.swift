@@ -17,18 +17,18 @@ final class GameChips: Model, Content {
     @Field(key: "gameId")
     var gameId: UUID
     
-    @Field(key: "chips")
-    var chips: Chips
+    @Field(key: "chip")
+    var chip: Chip
     
     @Field(key: "quantity")
     var quantity: Int
     
     init() { }
 
-    init(id: UUID? = nil, gameId: UUID, chips: Chips, quantity: Int) {
+    init(id: UUID? = nil, gameId: UUID, chip: Chip, quantity: Int) {
         self.id = id
         self.gameId = gameId
-        self.chips = chips
+        self.chip = chip
         self.quantity = quantity
     }
 }

@@ -14,21 +14,21 @@ final class ChipsOnField: Model, Content {
     @ID
     var id: UUID?
     
-    @Field(key: "gameId")
-    var gameId: UUID
+    @Field(key: "moveId")
+    var moveId: UUID
     
     @Field(key: "coordinate")
     var coordinate: Coordinate
     
-    @Field(key: "chips")
-    var chips: Chips
+    @Field(key: "chip")
+    var chip: Chip
     
     init() { }
 
-    init(id: UUID? = nil, gameId: UUID, chips: Chips, coordinate: Coordinate) {
+    init(id: UUID? = nil, moveId: UUID, chip: Chip, coordinate: Coordinate) {
         self.id = id
-        self.gameId = gameId
-        self.chips = chips
+        self.moveId = moveId
+        self.chip = chip
         self.coordinate = coordinate
     }
 }

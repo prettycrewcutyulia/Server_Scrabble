@@ -23,7 +23,7 @@ final class GamerIntoRoom: Model, Content {
     var enteredPassword: String? // введенный пользователем код от комнаты.
     
     @Field(key: "chips")
-    var chips: [Chips]?
+    var chips: [Chip]?
     
     init() {}
     
@@ -32,7 +32,7 @@ final class GamerIntoRoom: Model, Content {
         gamerId: UUID,
         roomId: UUID,
         enteredPassword: String? = nil,
-        chips: [Chips]? = nil
+        chips: [Chip]? = nil
     ) {
         self.id = id
         self.gamerId = gamerId

@@ -8,7 +8,7 @@
 import Fluent
 import Vapor
 
-struct Chips: Codable, Content {
+struct Chip: Codable, Content, Equatable {
     var alpha: String
     var point: Int
 }

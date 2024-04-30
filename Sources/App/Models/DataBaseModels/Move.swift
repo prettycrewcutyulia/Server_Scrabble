@@ -26,9 +26,6 @@ final class Move: Model, Content {
     @Field(key: "stopCoordinate")
     var stopCoordinate: Coordinate
     
-    @Field(key: "word")
-    var word: String
-    
     init() { }
 
     init(
@@ -36,14 +33,12 @@ final class Move: Model, Content {
         gameId: UUID,
         gamerId: UUID,
         startCoordinate: Coordinate,
-        stopCoordinate: Coordinate,
-        word: String
+        stopCoordinate: Coordinate
     ) {
         self.id = id
         self.gameId = gameId
         self.gamerId = gamerId
         self.startCoordinate = startCoordinate
         self.stopCoordinate = stopCoordinate
-        self.word = word
     }
 }
