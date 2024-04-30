@@ -8,6 +8,11 @@
 import Fluent
 import Vapor
 import JWT
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+import Alamofire
+
 
 struct MovesInGameController: RouteCollection {
     
@@ -21,13 +26,14 @@ struct MovesInGameController: RouteCollection {
         movesGroup.delete("deleteMove", use: { try await MovesFunction.deleteMove($0)})
         movesGroup.get("checkWord", ":word", use: { try await MovesFunction.checkWord($0) })
         movesGroup.get("getPointsByGamerId", ":gamerId", "gameId", ":gameId", use: { try await MovesFunction.getPointsByGamerId($0) })
+        movesGroup.get("getChipsForGamerId", ":gamerId", "gameId", ":gameId", "count", ":count", use: { try await MovesFunction.getChipsByGameId($0) })
     }
 }
 
 
 enum MovesFunction {
     // Получить все ходы в игре
-    static func getMovesByGameId(_ req: Request) async throws -> [MoveDTO] {
+    static func getMovesByGameId(_ req: Vapor.Request) async throws -> [MoveDTO] {
         guard let gameIDString = req.parameters.get("gameId"),
               let gameID = UUID(gameIDString)
         else {
@@ -60,7 +66,7 @@ enum MovesFunction {
     }
     
     // Сделать ход(поставить слово на карту)
-    static func createMove(_ req: Request) async throws -> Response {
+    static func createMove(_ req: Vapor.Request) async throws -> Response {
         let moveDTO = try req.content.decode(MoveDTO.self)
         let move = Move(
             gameId: moveDTO.gameId,
@@ -113,7 +119,7 @@ enum MovesFunction {
     }
     
     // Удалить ход
-    static func deleteMove(_ req: Request) async throws -> Response {
+    static func deleteMove(_ req: Vapor.Request) async throws -> Response {
         let move = try req.content.decode(Move.self)
         guard let move = try await Move.query(on: req.db)
             .filter(\.$gameId == move.gameId)
@@ -139,16 +145,14 @@ enum MovesFunction {
         
     }
     
-    // Проверить орфографию слова
-    static func checkWord(_ req: Request) async throws -> Response {
+    // проверить орфографию
+    static func checkWord(_ req: Vapor.Request) async throws -> Bool {
         guard let word = req.parameters.get("word") else {
             throw Abort(.badRequest, reason: "Не удалось получить слово для проверки орфографии.")
         }
 
         // URL для запроса к API Яндекс.Спеллер
         let urlString = "https://speller.yandex.net/services/spellservice.json/checkText?text=\(word)"
-
-        // Создаем URL из строки
         guard let url = URL(string: urlString) else {
             throw Abort(.internalServerError, reason: "Неверный URL")
         }
@@ -169,15 +173,11 @@ enum MovesFunction {
         }
 
         // Проверяем результаты орфографии
-        if !result.isEmpty {
-            return Response(status: .custom(code: 404, reasonPhrase: "Ошибка в орфографии найдена"))
-        } else {
-            return Response(status: .custom(code: 200, reasonPhrase: "Ошибка в орфографии не найдена"))
-        }
+        return result.isEmpty
     }
 
     // Получить очки игрока
-    static func getPointsByGamerId(_ req: Request) async throws -> Int {
+    static func getPointsByGamerId(_ req: Vapor.Request) async throws -> Int {
         guard let gamerIdString = req.parameters.get("gamerId"),
               let gamerId = UUID(gamerIdString),
               let gameIdString = req.parameters.get("gameId"),
@@ -200,5 +200,59 @@ enum MovesFunction {
         }
              
         return result
+    }
+    
+    static func getChipsByGameId(_ req: Vapor.Request) async throws -> [Chip] {
+        guard let gameRoom = try await GameRoom.find(req.parameters.get("gameId"), on: req.db)
+        else {
+            throw Abort(.notFound)
+        }
+        
+        guard let gamer = try await GamerIntoRoom.find(req.parameters.get("gamerId"), on: req.db)
+        else {
+            throw Abort(.notFound)
+        }
+        
+        guard let countString = req.parameters.get("count"), let count = Int(countString) else {
+            throw Abort(.custom(code: 400, reasonPhrase: "Некорректный запрос"))
+        }
+        
+        if gameRoom.currentNumberOfChips < count {
+            throw Abort(.custom(code: 400, reasonPhrase: "Не хватает фишек в мешке"))
+        }
+        
+        let gameChips = try await GameChips.query(on: req.db)
+            .filter(\.$gameId == gameRoom.id!)
+            .all()
+        let randomIndices = (0..<count).map { _ in Int.random(in: 0..<gameChips.count) }
+        let selectedChips = randomIndices.map { gameChips[$0] }
+
+        // Уменьшаем quantity для выбранных элементов и удаляем, если quantity <= 0
+        for chip in selectedChips {
+            chip.quantity -= 1
+            if chip.quantity <= 0 {
+                try await chip.delete(on: req.db)
+            } else {
+                try await chip.update(on: req.db)
+            }
+        }
+        
+        gameRoom.currentNumberOfChips -= count
+        try await gameRoom.update(on: req.db)
+        
+        let chips = selectedChips.map {chip in
+            return Chip(alpha: chip.chip.alpha, point: chip.chip.point)
+        }
+        
+        if var gamerChips = gamer.chips {
+            gamerChips.append(contentsOf: chips)
+            gamer.chips = gamerChips
+        } else {
+            gamer.chips = chips
+        }
+        
+        try await gamer.update(on: req.db)
+
+        return chips
     }
 }
