@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  GamerIntoRoomController.swift
 //
 //
 //  Created by Irina Pechik on 21.04.2024.

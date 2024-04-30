@@ -28,6 +28,7 @@ struct GameRoomController: RouteCollection {
         gameRoomsGroup.put(":gameRoomId", "pause", use: {try await self.pauseGame($0)})
         gameRoomsGroup.put(":gameRoomId", "end", use: {try await self.endedGame($0)})
         gameRoomsGroup.put(":gameRoomId", "stop", use: {try await self.stopGame($0)})
+        gameRoomsGroup.get(":gameRoomId", "getLeaderBoard", use: {try await self.getLeaderBoard($0)})
 
     }
     
@@ -146,5 +147,12 @@ struct GameRoomController: RouteCollection {
         gameRoom.currentNumberOfChips -= 1
         try await gameRoom.save(on: req.db)
         return gameRoom
+    }
+    
+    func getLeaderBoard(_ req: Request) async throws -> LeaderBoard {
+        let gameRoom = try await getGameRoom(req)
+        let scores = try await LeaderBoardService.getNickNamesWithScores(for: gameRoom.id!, db: req.db)
+        
+        return LeaderBoard(players: scores)
     }
 }
