@@ -30,12 +30,15 @@ struct GamerIntoRoomController: RouteCollection {
     
     // Создание связи между игроком и комнатой.
     func setGamerIntoRoom(_ req: Request) async throws -> GamerIntoRoom {
+        let payload = try req.jwt.verify(as: UserPayload.self)
         let gamerIntoRoom = try req.content.decode(GamerIntoRoom.self)
+        gamerIntoRoom.gamerId = UUID(payload.userID)
         
         // Ищем комнату
         if let room = try await GameRoom.query(on: req.db)
             .filter(\.$id == gamerIntoRoom.roomId).first() {
             // Если комната уже стартовала игру, к ней нельзя присоединиться.
+            print(GameStatus.NotStarted.rawValue)
             if room.gameStatus != GameStatus.NotStarted.rawValue {
                 throw Abort(.custom(code: 500, reasonPhrase: "Игра стартовала. Присоединиться к ней уже нельзя."))
             }
@@ -64,11 +67,13 @@ struct GamerIntoRoomController: RouteCollection {
         }
         let isGamerAlreadyInRoom = try await GamerIntoRoom.query(on: req.db)
             .filter(\.$gamerId == gamerIntoRoom.gamerId)
+            .filter(\.$roomId == gamerIntoRoom.roomId)
             .all()
             .count > 0
         if isGamerAlreadyInRoom {
             throw Abort(.custom(code: 500, reasonPhrase: "Данный игрок уже привязан в комнате"))
         }
+        print(gamerIntoRoom)
         try await gamerIntoRoom.save(on: req.db)
         return gamerIntoRoom
     }
@@ -117,7 +122,7 @@ struct GamerIntoRoomController: RouteCollection {
                 .filter(\.$roomId == roomId)
                 .all()
             return gamers.map {g in
-                return g.gamerId
+                return g.gamerId!
             }
         } else {
             throw Abort(.notFound)

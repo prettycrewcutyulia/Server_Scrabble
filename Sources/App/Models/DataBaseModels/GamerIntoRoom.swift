@@ -14,7 +14,7 @@ final class GamerIntoRoom: Model, Content {
     var id: UUID?
     
     @Field(key: "gamerId")
-    var gamerId: UUID
+    var gamerId: UUID?
     
     @Field(key: "roomId")
     var roomId: UUID

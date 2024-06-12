@@ -22,7 +22,7 @@ struct LeaderBoardService {
             let user = try await User.find(gamer.gamerId, on: db)
             
             let moves = try await Move.query(on: db)
-                .filter(\.$gamerId == gamer.gamerId)
+                .filter(\.$gamerId == gamer.gamerId!)
                 .filter(\.$gameId == roomId)
                 .all()
             
