@@ -37,7 +37,7 @@ services:
       POSTGRES_PASSWORD: vapor_password
       POSTGRES_DB: vapor_database
     ports:
-      - '8080:8080'
+      - '5432:5432'  # Uses to debug database from localhost
     healthcheck:
       test: /usr/bin/pg_isready
       interval: 5s
