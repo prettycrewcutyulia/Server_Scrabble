@@ -8,6 +8,7 @@
 import Fluent
 import Vapor
 import JWT
+import AsyncHTTPClient
 
 
 struct MovesInGameController: RouteCollection {
@@ -149,21 +150,20 @@ enum MovesFunction {
 
         // URL для запроса к API Яндекс.Спеллер
         let urlString = "https://speller.yandex.net/services/spellservice.json/checkText?text=\(word)"
-        guard let url = URL(string: urlString) else {
-            throw Abort(.internalServerError, reason: "Неверный URL")
-        }
 
         // Создаем URLRequest
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-
-        // Создаем URLSession
-        let session = URLSession.shared
+        var request = HTTPClientRequest(url: urlString)
+        request.method = .GET
 
         // Отправляем запрос
-        let (data, _) = try await session.data(for: request)
+        let response = try await HTTPClient.shared.execute(request, timeout: .seconds(30))
 
         // Парсим JSON ответ
+        
+        var buffer = try await response.body.collect(upTo: 1024*1024)
+        let readableBytes = buffer.readableBytes
+        let data = buffer.readData(length: readableBytes) ?? Data()
+        
         guard let result = try JSONSerialization.jsonObject(with: data, options: []) as? [[String: Any]] else {
             throw Abort(.internalServerError, reason: "Ошибка при обработке ответа от API")
         }
