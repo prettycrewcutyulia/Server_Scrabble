@@ -22,13 +22,13 @@ struct AuthController: RouteCollection {
     }
 
     // Метод для входа в систему и получения JWT
-    func login(_ req: Request) async throws -> String {
+    func login(_ req: Request) async throws -> UserLoginResponse {
         // Предположим, что у нас есть функция для проверки учетных данных пользователя
         let credentials = try req.content.decode(UserCredentials.self)
         let user = try await authenticate(credentials: credentials, on: req)
         
         let token = try TokensHelper.createAccessToken(from: user, signers: req.application.jwt.signers)
-        return token
+        return UserLoginResponse(id: user.id?.uuidString ?? "", token: token)
     }
 
 
