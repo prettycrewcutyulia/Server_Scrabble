@@ -36,19 +36,21 @@ struct GamerIntoRoomController: RouteCollection {
         if let room = try await GameRoom.query(on: req.db)
             .filter(\.$id == gamerIntoRoom.roomId).first() {
             // Если комната уже стартовала игру, к ней нельзя присоединиться.
-            if room.gameStatus != GameStatus.NotStarted.rawValue {
+            if room.gameStatus.lowercased() != GameStatus.NotStarted.rawValue.lowercased() {
                 throw Abort(.custom(code: 500, reasonPhrase: "Игра стартовала. Присоединиться к ней уже нельзя."))
             }
             
             // Если существует код у комнаты - проверям на соответствие его с введенным пользователем кодом.
             if let roomCode = room.roomCode {
-                // Проверка на всякий случай, что пользователь ввел пароль.
-                if let gamerEnteredPassword = gamerIntoRoom.enteredPassword {
-                    if roomCode != gamerEnteredPassword {
-                        throw Abort(.custom(code: 500, reasonPhrase: "Неверно введен код от игровой комнаты."))
+                if !roomCode.isEmpty {
+                    // Проверка на всякий случай, что пользователь ввел пароль.
+                    if let gamerEnteredPassword = gamerIntoRoom.enteredPassword {
+                        if roomCode != gamerEnteredPassword {
+                            throw Abort(.custom(code: 500, reasonPhrase: "Неверно введен код от игровой комнаты."))
+                        }
+                    } else {
+                        throw Abort(.custom(code: 404, reasonPhrase: "Введите пароль от комнаты."))
                     }
-                } else {
-                    throw Abort(.custom(code: 404, reasonPhrase: "Введите пароль от комнаты."))
                 }
             }
         } else {
@@ -129,6 +131,7 @@ struct GamerIntoRoomController: RouteCollection {
         if let roomIdString = req.parameters.get("roomId"), let roomId = UUID(roomIdString) {
             let rooms = try await GamerIntoRoom.query(on: req.db)
                 .filter(\.$roomId == roomId).all()
+            print(rooms.count)
             if !rooms.isEmpty {
                 let room = try await GameRoom.query(on: req.db)
                     .filter(\.$id == roomId).first()

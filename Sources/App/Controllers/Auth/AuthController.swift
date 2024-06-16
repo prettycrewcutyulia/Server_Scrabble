@@ -15,9 +15,10 @@ struct AuthController: RouteCollection {
         let authGroup = routes
             .grouped("auth")
             .protectedWithApiKey()
-        
+
         authGroup.post("login", use: {try await self.login($0)})
         authGroup.post("register", use: {try await self.register($0)})
+        authGroup.get("getUserById", ":userId", use: {try await self.getUserById($0)})
     }
 
     // Метод для входа в систему и получения JWT
@@ -68,5 +69,20 @@ struct AuthController: RouteCollection {
         try await newUser.save(on: req.db).get()
 
         return newUser
+    }
+    
+    func getUserById(_ req: Request) async throws -> User {
+        if let userId = req.parameters.get("userId") {
+            if let id = UUID(uuidString: userId) {
+                guard let user = try await User.query(on: req.db)
+                    .filter(\.$id == id)
+                    .first()
+                    .get() else {
+                    throw Abort(.unauthorized, reason: "User with this id was not found.")
+                }
+                return user
+            }
+        }
+        throw Abort(.unauthorized, reason: "Error id")
     }
 }

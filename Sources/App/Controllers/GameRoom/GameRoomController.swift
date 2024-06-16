@@ -41,7 +41,6 @@ struct GameRoomController: RouteCollection {
         
         try await gameRoom.save(on: req.db)
         try await FieldService.createInitialGameChips(for: try gameRoom.requireID(), on: req.db).get()
-        
         return gameRoom
     }
     
