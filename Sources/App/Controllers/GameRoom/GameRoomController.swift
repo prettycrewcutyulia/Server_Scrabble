@@ -28,6 +28,7 @@ struct GameRoomController: RouteCollection {
         gameRoomsGroup.put(":gameRoomId", "end", use: {try await self.endedGame($0)})
         gameRoomsGroup.put(":gameRoomId", "stop", use: {try await self.stopGame($0)})
         gameRoomsGroup.get(":gameRoomId", "getLeaderBoard", use: {try await self.getLeaderBoard($0)})
+        gameRoomsGroup.delete(":gameRoomId", use: {try await self.deleteRoom($0)})
 
     }
     
@@ -147,4 +148,24 @@ struct GameRoomController: RouteCollection {
         
         return LeaderBoard(players: scores)
     }
+    
+    func deleteRoom(_ req: Request) async throws -> HTTPStatus {
+        let gameRoom = try await getGameRoom(req)
+        let payload = try req.jwt.verify(as: UserPayload.self)
+
+        if let userId = UUID(payload.userID) {
+            let user = try await User.query(on: req.db)
+                .filter(\.$id == userId).first()
+            
+            if (user!.nickName != gameRoom.adminNickname) {
+                throw Abort(.forbidden)
+            }
+            
+            try await gameRoom.delete(on: req.db)
+            return .noContent
+        } else {
+            throw Abort(.notFound)
+        }
+    }
+
 }
