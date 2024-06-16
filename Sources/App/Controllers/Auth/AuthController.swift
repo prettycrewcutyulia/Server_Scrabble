@@ -52,7 +52,7 @@ struct AuthController: RouteCollection {
     }
     
     // Метод для регистрации нового пользователя
-    func register(_ req: Request) async throws -> User {
+    func register(_ req: Request) async throws -> UserRegistrationResponse {
         let credentials = try req.content.decode(UserCredentials.self)
         // Проверяем, существует ли уже пользователь с таким именем пользователя
         let existingUser = try await User.query(on: req.db)
@@ -68,7 +68,7 @@ struct AuthController: RouteCollection {
         let newUser = User(nickName: credentials.nickName, password: credentials.password)
         try await newUser.save(on: req.db).get()
 
-        return newUser
+        return UserRegistrationResponse(id: newUser.id?.uuidString ?? "")
     }
     
     func getUserById(_ req: Request) async throws -> User {

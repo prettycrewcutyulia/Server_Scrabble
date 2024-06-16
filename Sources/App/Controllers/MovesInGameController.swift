@@ -8,9 +8,6 @@
 import Fluent
 import Vapor
 import JWT
-#if canImport(FoundationNetworking)
-import FoundationNetworking
-#endif
 
 
 struct MovesInGameController: RouteCollection {
@@ -87,13 +84,6 @@ enum MovesFunction {
             return chip.chip
         }
         
-        let chipsString = moveDTO.chips.map { $0.chip.alpha }.joined(separator: "")
-        
-        let result = try await checkWord(word: chipsString)
-        if !result {
-            return Response(status: .badRequest, body: "Слово орфографически некорректно.")
-        }
-        
         for chip in chips {
             if let index = gamerChips?.firstIndex(of: chip) {
                 gamerChips?.remove(at: index)
@@ -156,33 +146,6 @@ enum MovesFunction {
         guard let word = req.parameters.get("word") else {
             throw Abort(.badRequest, reason: "Не удалось получить слово для проверки орфографии.")
         }
-
-        // URL для запроса к API Яндекс.Спеллер
-        let urlString = "https://speller.yandex.net/services/spellservice.json/checkText?text=\(word)"
-        guard let url = URL(string: urlString) else {
-            throw Abort(.internalServerError, reason: "Неверный URL")
-        }
-
-        // Создаем URLRequest
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-
-        // Создаем URLSession
-        let session = URLSession.shared
-
-        // Отправляем запрос
-        let (data, _) = try await session.data(for: request)
-
-        // Парсим JSON ответ
-        guard let result = try JSONSerialization.jsonObject(with: data, options: []) as? [[String: Any]] else {
-            throw Abort(.internalServerError, reason: "Ошибка при обработке ответа от API")
-        }
-
-        // Проверяем результаты орфографии
-        return result.isEmpty
-    }
-
-    static func checkWord(word: String) async throws -> Bool {
 
         // URL для запроса к API Яндекс.Спеллер
         let urlString = "https://speller.yandex.net/services/spellservice.json/checkText?text=\(word)"
